@@ -1,150 +1,359 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Finacon | Wallet Experience</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div class="app-shell">
-      <aside class="sidebar glass">
-        <div>
-          <p class="logo">FINACON</p>
-          <h1>Wallet Experience</h1>
-          <p class="muted">Control total de dinero, inversiones y objetivos.</p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Finacon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-top">
+        <div class="logo">
+          <span class="logo-gem">&#9670;</span>
+          <span class="logo-name">Finacon</span>
         </div>
-        <nav class="nav-list">
-          <button class="nav-item active">🏠 Dashboard</button>
-          <button class="nav-item">💸 Movimientos</button>
-          <button class="nav-item">📈 Inversiones</button>
-          <button class="nav-item">🎯 Objetivos</button>
-          <button class="nav-item">⚙️ Ajustes</button>
+        <nav class="nav">
+          <button class="nav-item active" data-section="dashboard">
+            <span class="nav-icon">&#127968;</span>
+            <span class="nav-label">Dashboard</span>
+          </button>
+          <button class="nav-item" data-section="transactions">
+            <span class="nav-icon">&#8645;</span>
+            <span class="nav-label">Transacciones</span>
+          </button>
+          <button class="nav-item" data-section="accounts">
+            <span class="nav-icon">&#128179;</span>
+            <span class="nav-label">Cuentas</span>
+          </button>
+          <button class="nav-item" data-section="budgets">
+            <span class="nav-icon">&#127919;</span>
+            <span class="nav-label">Presupuestos</span>
+          </button>
+          <button class="nav-item" data-section="reports">
+            <span class="nav-icon">&#128202;</span>
+            <span class="nav-label">Informes</span>
+          </button>
         </nav>
-        <div class="market-status">
-          <p class="muted">Estado mercado</p>
-          <strong id="marketStatus">Sincronizando...</strong>
-          <small id="marketUpdatedAt">--</small>
-          <button id="refreshPricesBtn" class="btn-primary" type="button">Actualizar</button>
-        </div>
-      </aside>
+      </div>
 
-      <main class="content">
-        <section class="hero glass">
-          <div>
-            <p class="tag">Patrimonio total</p>
-            <h2 id="netWorthValue">$0.00</h2>
-            <p class="muted">Balance mensual + valor actual del portfolio.</p>
-          </div>
-          <div class="quick-actions">
-            <button id="quickIncomeBtn" type="button">+ Ingreso rápido</button>
-            <button id="quickExpenseBtn" type="button">- Gasto rápido</button>
-          </div>
-        </section>
+      <div class="sidebar-accounts-section">
+        <p class="sidebar-section-title">Cuentas</p>
+        <div id="sidebarAccountsList"></div>
+      </div>
 
-        <section class="metrics-grid">
-          <article class="metric glass"><span>Ingresos</span><strong id="incomeValue">$0.00</strong></article>
-          <article class="metric glass"><span>Gastos</span><strong id="expenseValue">$0.00</strong></article>
-          <article class="metric glass"><span>Balance</span><strong id="balanceValue">$0.00</strong></article>
-          <article class="metric glass"><span>Portfolio</span><strong id="portfolioValue">$0.00</strong></article>
-          <article class="metric glass"><span>P/L total</span><strong id="portfolioPnl">$0.00</strong></article>
-          <article class="metric glass"><span>Objetivo ahorro</span><strong id="savingsProgress">0%</strong></article>
-        </section>
+      <div class="sidebar-bottom">
+        <button class="nav-item" data-section="settings">
+          <span class="nav-icon">&#9881;</span>
+          <span class="nav-label">Ajustes</span>
+        </button>
+      </div>
+    </aside>
 
-        <section class="layout-2">
-          <article class="panel glass">
-            <h3>Registrar movimiento</h3>
-            <form id="transactionForm" class="form-grid tx-grid">
-              <label>Tipo
-                <select id="txType" required>
-                  <option value="income">Ingreso</option>
-                  <option value="expense">Gasto</option>
-                </select>
-              </label>
-              <label>Categoría
-                <input id="txCategory" type="text" placeholder="Ej: Comida" required />
-              </label>
-              <label>Monto
-                <input id="txAmount" type="number" step="0.01" min="0.01" required />
-              </label>
-              <button class="btn-primary" type="submit">Guardar</button>
-            </form>
-
-            <div class="table-wrap">
-              <table>
-                <thead>
-                  <tr><th>Fecha</th><th>Tipo</th><th>Categoría</th><th>Monto</th></tr>
-                </thead>
-                <tbody id="transactionsBody"></tbody>
-              </table>
-            </div>
-          </article>
-
-          <article class="panel glass">
-            <div class="panel-head">
-              <h3>Asignación de activos</h3>
-              <span id="allocationLegendText" class="muted">Sin posiciones</span>
-            </div>
-            <div class="allocation-wrap">
-              <div id="allocationDonut" class="allocation-donut"></div>
-              <ul id="allocationLegend" class="allocation-legend"></ul>
-            </div>
-
-            <h3>Watchlist</h3>
-            <form id="watchlistForm" class="watchlist-form">
-              <input id="watchSymbol" type="text" placeholder="BTC, AAPL, SPY" required />
-              <select id="watchClass">
-                <option value="crypto">Crypto</option>
-                <option value="stock">Acción</option>
-                <option value="etf">ETF</option>
-              </select>
-              <button class="btn-primary" type="submit">Añadir</button>
-            </form>
-            <ul id="watchlistBody" class="watchlist-list"></ul>
-          </article>
-        </section>
-
-        <section class="panel glass">
-          <div class="panel-head">
-            <h3>Portfolio de inversión</h3>
-            <span class="muted">Crypto · Acciones · ETF</span>
-          </div>
-          <form id="investmentForm" class="form-grid inv-grid">
-            <label>Clase
-              <select id="assetClass" required>
-                <option value="crypto">Crypto</option>
-                <option value="stock">Acción</option>
-                <option value="etf">ETF</option>
-              </select>
-            </label>
-            <label>Símbolo
-              <input id="assetSymbol" type="text" placeholder="BTC" required />
-            </label>
-            <label>Cantidad
-              <input id="assetQuantity" type="number" min="0.000001" step="any" required />
-            </label>
-            <label>Precio compra
-              <input id="assetBuyPrice" type="number" min="0.000001" step="any" required />
-            </label>
-            <button class="btn-primary" type="submit">Añadir posición</button>
-          </form>
-
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th>Activo</th><th>Cantidad</th><th>Compra</th><th>Actual</th><th>Valor</th><th>P/L</th><th></th></tr>
-              </thead>
-              <tbody id="investmentsBody"></tbody>
-            </table>
-          </div>
-        </section>
-      </main>
+    <!-- Mobile header -->
+    <div class="mobile-header">
+      <button class="mobile-menu-btn" id="mobileMenuBtn">&#9776;</button>
+      <span class="logo-name">Finacon</span>
+      <button class="btn-primary btn-sm" id="mobileAddBtn">+</button>
     </div>
 
-    <template id="emptyRowTemplate">
-      <tr><td colspan="7" class="empty">Aún no hay datos.</td></tr>
-    </template>
+    <!-- Main content -->
+    <main class="main">
 
-    <script src="app.js" defer></script>
-  </body>
+      <!-- DASHBOARD -->
+      <section class="section active" id="section-dashboard">
+        <header class="page-header">
+          <div>
+            <h2 class="page-title">Dashboard</h2>
+            <p class="page-sub" id="dashboardPeriodLabel"></p>
+          </div>
+          <div class="header-actions">
+            <button class="btn-icon" id="dashPrevBtn">&#8249;</button>
+            <button class="btn-icon" id="dashNextBtn">&#8250;</button>
+            <button class="btn-primary" id="addTxBtn">+ Transaccion</button>
+          </div>
+        </header>
+
+        <div class="kpi-grid" id="kpiGrid"></div>
+
+        <div class="dashboard-grid">
+          <div class="card" id="dashCatCard">
+            <h3 class="card-title">Gastos por categoria</h3>
+            <div class="donut-container">
+              <div class="donut-wrap">
+                <canvas id="donutChart" width="160" height="160"></canvas>
+                <div class="donut-center" id="donutCenter"></div>
+              </div>
+              <ul class="donut-legend" id="donutLegend"></ul>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3 class="card-title">Ultimas transacciones</h3>
+              <button class="btn-link" data-section="transactions">Ver todo</button>
+            </div>
+            <div id="recentTxList"></div>
+          </div>
+        </div>
+
+        <div class="card" id="dashBudgetCard">
+          <div class="card-head">
+            <h3 class="card-title">Presupuestos del mes</h3>
+            <button class="btn-link" data-section="budgets">Gestionar</button>
+          </div>
+          <div id="dashBudgetList"></div>
+        </div>
+      </section>
+
+      <!-- TRANSACTIONS -->
+      <section class="section" id="section-transactions">
+        <header class="page-header">
+          <h2 class="page-title">Transacciones</h2>
+          <div class="header-actions">
+            <input type="month" id="txMonthFilter" class="input-control" />
+            <select id="txAccountFilter" class="input-control">
+              <option value="">Todas las cuentas</option>
+            </select>
+            <select id="txTypeFilter" class="input-control">
+              <option value="">Todos</option>
+              <option value="income">Ingresos</option>
+              <option value="expense">Gastos</option>
+              <option value="transfer">Transferencias</option>
+            </select>
+            <button class="btn-primary" id="addTxBtn2">+ Anadir</button>
+          </div>
+        </header>
+        <div id="txGroupedList"></div>
+      </section>
+
+      <!-- ACCOUNTS -->
+      <section class="section" id="section-accounts">
+        <header class="page-header">
+          <h2 class="page-title">Cuentas</h2>
+          <button class="btn-primary" id="addAccountBtn">+ Nueva cuenta</button>
+        </header>
+        <div id="accountsContent"></div>
+      </section>
+
+      <!-- BUDGETS -->
+      <section class="section" id="section-budgets">
+        <header class="page-header">
+          <div>
+            <h2 class="page-title">Presupuestos</h2>
+            <p class="page-sub" id="budgetPeriodLabel"></p>
+          </div>
+          <button class="btn-primary" id="addBudgetBtn">+ Nuevo presupuesto</button>
+        </header>
+        <div id="budgetsContent"></div>
+      </section>
+
+      <!-- REPORTS -->
+      <section class="section" id="section-reports">
+        <header class="page-header">
+          <h2 class="page-title">Informes</h2>
+          <div class="header-actions">
+            <div class="period-toggle">
+              <button class="period-btn active" data-rperiod="month">Mes</button>
+              <button class="period-btn" data-rperiod="year">Ano</button>
+            </div>
+            <button class="btn-icon" id="reportPrevBtn">&#8249;</button>
+            <span class="period-label" id="reportPeriodLabel"></span>
+            <button class="btn-icon" id="reportNextBtn">&#8250;</button>
+          </div>
+        </header>
+
+        <div class="report-kpi-row" id="reportKpiRow"></div>
+
+        <div class="reports-grid">
+          <div class="card">
+            <h3 class="card-title">Ingresos vs Gastos</h3>
+            <canvas id="barChart"></canvas>
+          </div>
+          <div class="card">
+            <h3 class="card-title">Distribucion de gastos</h3>
+            <canvas id="reportDonutChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Top categorias de gasto</h3>
+          <div id="topCatList"></div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="section" id="section-settings">
+        <header class="page-header">
+          <h2 class="page-title">Ajustes</h2>
+        </header>
+        <div class="settings-grid">
+          <div class="card">
+            <h3 class="card-title">Moneda</h3>
+            <div class="form-group">
+              <label>Moneda principal</label>
+              <select id="currencySelect" class="input-control">
+                <option value="USD">USD - Dolar americano</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="MXN">MXN - Peso mexicano</option>
+                <option value="ARS">ARS - Peso argentino</option>
+                <option value="COP">COP - Peso colombiano</option>
+                <option value="CLP">CLP - Peso chileno</option>
+                <option value="PEN">PEN - Sol peruano</option>
+                <option value="BRL">BRL - Real brasileno</option>
+                <option value="GBP">GBP - Libra esterlina</option>
+              </select>
+            </div>
+          </div>
+          <div class="card">
+            <h3 class="card-title">Datos</h3>
+            <div class="settings-actions">
+              <button class="btn-secondary" id="exportCsvBtn">Exportar CSV</button>
+              <button class="btn-danger" id="resetDataBtn">Borrar todos los datos</button>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 class="card-title">Categorias disponibles</h3>
+          <p class="text-muted" style="font-size:0.83rem;margin-bottom:1rem;">Gastos</p>
+          <div class="cat-display-grid" id="expenseCatDisplay"></div>
+          <p class="text-muted" style="font-size:0.83rem;margin:1rem 0;">Ingresos</p>
+          <div class="cat-display-grid" id="incomeCatDisplay"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL: Transaction -->
+  <div class="overlay" id="overlayTx" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="txModalTitle">Nueva transaccion</h3>
+        <button class="modal-close" data-close="overlayTx">&#215;</button>
+      </div>
+      <div class="modal-body">
+        <div class="type-tabs" id="txTypeTabs">
+          <button class="type-tab active" data-type="expense">Gasto</button>
+          <button class="type-tab" data-type="income">Ingreso</button>
+          <button class="type-tab" data-type="transfer">Transferencia</button>
+        </div>
+
+        <input type="hidden" id="txEditId" />
+
+        <div class="form-group">
+          <label>Monto</label>
+          <input type="number" id="txAmount" class="input-control large-input" placeholder="0.00" step="0.01" min="0.01" />
+        </div>
+
+        <div id="txCatGroup" class="form-group">
+          <label>Categoria</label>
+          <div class="cat-picker" id="catPicker"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label id="txAccountLabel">Cuenta</label>
+            <select id="txAccount" class="input-control"></select>
+          </div>
+          <div class="form-group" id="txToAccountGroup" style="display:none">
+            <label>Cuenta destino</label>
+            <select id="txToAccount" class="input-control"></select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fecha</label>
+            <input type="date" id="txDate" class="input-control" />
+          </div>
+          <div class="form-group">
+            <label>Nota (opcional)</label>
+            <input type="text" id="txNote" class="input-control" placeholder="Descripcion..." />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close="overlayTx">Cancelar</button>
+        <button class="btn-primary" id="saveTxBtn">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Account -->
+  <div class="overlay" id="overlayAccount" role="dialog" aria-modal="true">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="accountModalTitle">Nueva cuenta</h3>
+        <button class="modal-close" data-close="overlayAccount">&#215;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="accountEditId" />
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="accountName" class="input-control" placeholder="Ej: Cuenta bancaria..." />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo</label>
+            <select id="accountType" class="input-control">
+              <option value="bank">Banco</option>
+              <option value="cash">Efectivo</option>
+              <option value="credit">Credito</option>
+              <option value="savings">Ahorro</option>
+              <option value="investment">Inversion</option>
+              <option value="crypto">Crypto</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Balance inicial</label>
+            <input type="number" id="accountBalance" class="input-control" placeholder="0.00" step="0.01" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Color</label>
+          <div class="color-picker" id="colorPicker"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close="overlayAccount">Cancelar</button>
+        <button class="btn-primary" id="saveAccountBtn">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Budget -->
+  <div class="overlay" id="overlayBudget" role="dialog" aria-modal="true">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h3>Nuevo presupuesto</h3>
+        <button class="modal-close" data-close="overlayBudget">&#215;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="budgetEditId" />
+        <div class="form-group">
+          <label>Categoria</label>
+          <select id="budgetCategory" class="input-control"></select>
+        </div>
+        <div class="form-group">
+          <label>Limite mensual</label>
+          <input type="number" id="budgetAmount" class="input-control large-input" placeholder="0.00" step="0.01" min="0.01" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" data-close="overlayBudget">Cancelar</button>
+        <button class="btn-primary" id="saveBudgetBtn">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
 </html>
